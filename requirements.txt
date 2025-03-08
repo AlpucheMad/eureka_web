@@ -25,4 +25,5 @@ pytest==7.4.3
 pytest-cov==4.1.0
 
 # Frontend
-tailwind==3.1.0
+# Nota: Tailwind se instalará mediante npm/node
+# tailwind==3.1.0 # Removido porque no es un paquete de Python
