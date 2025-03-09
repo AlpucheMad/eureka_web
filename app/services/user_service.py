@@ -9,7 +9,7 @@ class UserService:
     Servicio para gestionar operaciones relacionadas con usuarios.
     """
     
-    def create_user(self, username, email, password, is_verified=False, is_active=True):
+    def create_user(self, username, email, password, is_verified=False, is_active=True, accept_terms=False):
         """
         Crea un nuevo usuario en la base de datos.
         
@@ -19,6 +19,7 @@ class UserService:
             password (str): Contraseña en texto plano (será hasheada).
             is_verified (bool): Indica si el correo ha sido verificado.
             is_active (bool): Indica si la cuenta está activa.
+            accept_terms (bool): Indica si el usuario ha aceptado los términos y condiciones.
             
         Returns:
             User: Instancia del usuario creado.
@@ -30,6 +31,9 @@ class UserService:
             is_active=is_active
         )
         user.password = password  # Se hashea mediante el setter del modelo
+        
+        if accept_terms:
+            user.accept_terms()
         
         db.session.add(user)
         db.session.commit()

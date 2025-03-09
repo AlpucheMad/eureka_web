@@ -9,3 +9,11 @@ def index():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
     return render_template('index.html', now=datetime.now())
+
+@main.route('/terms')
+def terms():
+    return render_template('terms.html', now=datetime.now())
+
+@main.route('/privacy')
+def privacy():
+    return render_template('privacy.html', now=datetime.now())

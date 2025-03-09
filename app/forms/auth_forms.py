@@ -37,6 +37,9 @@ class RegistrationForm(FlaskForm):
         DataRequired(message="Debes confirmar la contraseña."),
         EqualTo('password', message="Las contraseñas no coinciden.")
     ])
+    accept_terms = BooleanField('Acepto los términos y condiciones', validators=[
+        DataRequired(message="Debes aceptar los términos y condiciones para continuar.")
+    ])
     submit = SubmitField('Registrarse')
 
 class RequestResetPasswordForm(FlaskForm):

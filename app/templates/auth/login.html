@@ -5,6 +5,7 @@
 {% block subtitle %}Inicia sesión para acceder a tus notas{% endblock %}
 
 {% block content %}
+<div class="auth-card">
     <h2>Iniciar sesión</h2>
     
     <form method="POST" action="{{ url_for('auth.login') }}" hx-post="{{ url_for('auth.login') }}" hx-swap="outerHTML" hx-target="closest form">
@@ -48,4 +49,5 @@
         ¿No tienes una cuenta? 
         <a href="{{ url_for('auth.register') }}" hx-get="{{ url_for('auth.register') }}" hx-push-url="true" hx-target="body" hx-swap="outerHTML transition:true">Regístrate aquí</a>
     </div>
+</div>
 {% endblock %} 

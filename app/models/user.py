@@ -31,6 +31,10 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
     
+    # Aceptación de términos y condiciones
+    has_accepted_terms = db.Column(db.Boolean, default=False, nullable=False)
+    terms_accepted_at = db.Column(db.DateTime, nullable=True)
+    
     # Preferencias
     theme_preference = db.Column(db.String(10), default='claro', nullable=False)
     
@@ -95,6 +99,13 @@ class User(UserMixin, db.Model):
         Verifica si la contraseña proporcionada coincide con el hash almacenado.
         """
         return bcrypt.check_password_hash(self._password_hash, password)
+    
+    def accept_terms(self):
+        """
+        Registra la aceptación de términos y condiciones.
+        """
+        self.has_accepted_terms = True
+        self.terms_accepted_at = datetime.utcnow()
     
     def soft_delete(self):
         """

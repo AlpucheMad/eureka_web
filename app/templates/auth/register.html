@@ -5,6 +5,7 @@
 {% block subtitle %}Crea tu cuenta en Eureka{% endblock %}
 
 {% block content %}
+<div class="auth-card">
     <h2>Crear cuenta</h2>
     
     <form method="POST" action="{{ url_for('auth.register') }}" hx-post="{{ url_for('auth.register') }}" hx-swap="outerHTML" hx-target="closest form">
@@ -51,6 +52,19 @@
             {% endif %}
         </div>
         
+        <div class="form-check terms-check">
+            {{ form.accept_terms(class="form-check-input") }}
+            <label for="accept_terms" class="form-check-label">
+                Acepto los <a href="{{ url_for('main.terms') }}" target="_blank">Términos y Condiciones</a> y la 
+                <a href="{{ url_for('main.privacy') }}" target="_blank">Política de Privacidad</a>
+            </label>
+            {% if form.accept_terms.errors %}
+                {% for error in form.accept_terms.errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
         <div class="form-group">
             {{ form.submit(class="btn btn-primary") }}
         </div>
@@ -60,4 +74,27 @@
         ¿Ya tienes una cuenta? 
         <a href="{{ url_for('auth.login') }}" hx-get="{{ url_for('auth.login') }}" hx-push-url="true" hx-target="body" hx-swap="outerHTML transition:true">Inicia sesión aquí</a>
     </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .terms-check {
+        margin-bottom: 1.5rem;
+    }
+    
+    .terms-check a {
+        color: var(--color-accent);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .terms-check a:hover {
+        text-decoration: underline;
+    }
+    
+    .terms-check .form-error {
+        margin-left: 1.5rem;
+    }
+</style>
 {% endblock %} 

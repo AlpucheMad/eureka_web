@@ -72,7 +72,8 @@ def register():
             username=form.username.data,
             email=form.email.data,
             password=form.password.data,
-            is_verified=False
+            is_verified=False,
+            accept_terms=form.accept_terms.data
         )
         
         # Enviar correo de confirmación
@@ -147,7 +148,7 @@ def reset_password(token):
         flash('Tu contraseña ha sido actualizada. Ya puedes iniciar sesión.', 'success')
         return redirect(url_for('auth.login'))
         
-    return render_template('auth/reset_password.html', form=form, now=datetime.now())
+    return render_template('auth/reset_password.html', form=form, now=datetime.now(), token=token)
 
 @auth.route('/resend-confirmation')
 @anonymous_user_required
