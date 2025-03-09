@@ -91,10 +91,12 @@ def test_collection(db_session, test_user):
 @pytest.fixture
 def test_entry(db_session, test_user, test_collection):
     """Crea una entrada de prueba."""
+    status_value = EntryStatus.BORRADOR.value if os.environ.get('FLASK_ENV') == 'testing' else EntryStatus.BORRADOR
+    
     entry = Entry(
         title='Test Entry',
         content='This is a test entry content',
-        status=EntryStatus.BORRADOR,
+        status=status_value,
         user_id=test_user.id,
         collection_id=test_collection.id,
         created_at=datetime.utcnow(),
