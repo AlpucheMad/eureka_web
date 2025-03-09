@@ -1,0 +1,33 @@
+/**
+ * Eureka - Definición de fuentes
+ * Uso de fuentes del sistema en lugar de fuentes CDN
+ */
+
+/* Usar fuentes del sistema que sean similares a Inter */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+/* Definir pesos comunes */
+b, strong, h1, h2, h3, h4, h5, h6, .font-bold {
+    font-weight: 700;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-normal {
+    font-weight: 400;
+}
+
+.font-light {
+    font-weight: 300;
+} 

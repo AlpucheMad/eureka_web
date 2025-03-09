@@ -1,0 +1,20 @@
+{
+    "name": "Eureka - Tu espacio de ideas",
+    "short_name": "Eureka",
+    "icons": [
+        {
+            "src": "/static/images/EUREKA-ICON-CLR-PNG.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/images/EUREKA-ICON-CLR-PNG.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#F9B234",
+    "background_color": "#121212",
+    "display": "standalone",
+    "orientation": "portrait"
+} 
