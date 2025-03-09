@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Eureka - Tu espacio personal para capturar y organizar ideas">
+    <meta name="keywords" content="eureka, notas, organización, ideas, markdown, productividad">
+    <meta name="author" content="Eureka">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/EUREKA-ICON-CLR-PNG.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/EUREKA-ICON-CLR-PNG.png') }}">
+    
+    <title>{% block title %}Eureka - Tu espacio de ideas{% endblock %}</title>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/htmx.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/layout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/app.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/tags.css') }}">
+    {% block extra_styles %}{% endblock %}
+    
+    <!-- HTMX y scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.2/dist/htmx.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.29.0/dist/feather.min.js" defer></script>
+    <script src="{{ url_for('static', filename='js/utilities/htmx-utilities.js') }}" defer></script>
+</head>
+<body class="{% if current_user.theme %}theme-{{ current_user.theme }}{% else %}theme-light{% endif %}">
+    <!-- Header/Barra Superior -->
+    <header class="app-header">
+        <div class="header-left">
+            <button class="menu-toggle header-action-btn" id="sidebar-toggle" aria-label="Alternar menú">
+                <i data-feather="menu"></i>
+            </button>
+            <div class="header-logo">
+                <img src="{{ url_for('static', filename='images/EUREKA-ICON-WHT-PNG.png') }}" alt="Eureka Logo">
+                <h1>Eure<span class="accent">k</span>a</h1>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <button class="header-action-btn" aria-label="Nueva entrada" 
+                    hx-get="{{ url_for('entry.new_entry_partial') }}"
+                    hx-target="#main-content"
+                    hx-push-url="{{ url_for('entry.new_entry') }}">
+                <i data-feather="plus"></i>
+            </button>
+            <button class="header-action-btn" aria-label="Buscar">
+                <i data-feather="search"></i>
+            </button>
+            <div class="user-menu">
+                <button class="header-action-btn" aria-label="Menú de usuario">
+                    <i data-feather="user"></i>
+                </button>
+                <!-- Dropdown del menú de usuario se implementará más adelante -->
+            </div>
+        </div>
+    </header>
+    
+    <!-- Sidebar/Panel Lateral -->
+    <aside class="app-sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Navegación</div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="{{ url_for('entry.list_entries') }}" class="sidebar-nav-link {% if request.endpoint == 'entry.list_entries' %}active{% endif %}"
+                       hx-get="{{ url_for('entry.list_entries_partial') }}"
+                       hx-target="#main-content"
+                       hx-push-url="{{ url_for('entry.list_entries') }}">
+                        <span class="sidebar-nav-icon"><i data-feather="home"></i></span>
+                        <span class="sidebar-nav-text">Inicio</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{{ url_for('entry.list_entries') }}" class="sidebar-nav-link"
+                       hx-get="{{ url_for('entry.list_entries_partial') }}"
+                       hx-target="#main-content"
+                       hx-push-url="{{ url_for('entry.list_entries') }}">
+                        <span class="sidebar-nav-icon"><i data-feather="book"></i></span>
+                        <span class="sidebar-nav-text">Todas las entradas</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{{ url_for('entry.trash') }}" class="sidebar-nav-link {% if request.endpoint == 'entry.trash' %}active{% endif %}"
+                       hx-get="{{ url_for('entry.trash_partial') }}"
+                       hx-target="#main-content"
+                       hx-push-url="{{ url_for('entry.trash') }}">
+                        <span class="sidebar-nav-icon"><i data-feather="trash-2"></i></span>
+                        <span class="sidebar-nav-text">Papelera</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Colecciones</div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"><i data-feather="folder"></i></span>
+                        <span class="sidebar-nav-text">Personal</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"><i data-feather="folder"></i></span>
+                        <span class="sidebar-nav-text">Trabajo</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"><i data-feather="folder-plus"></i></span>
+                        <span class="sidebar-nav-text">Nueva colección</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Etiquetas</div>
+            <div class="sidebar-tags">
+                <div class="sidebar-tag">
+                    <div class="sidebar-tag-color tag-color-primary"></div>
+                    <div class="sidebar-tag-name">Ideas</div>
+                </div>
+                <div class="sidebar-tag">
+                    <div class="sidebar-tag-color tag-color-success"></div>
+                    <div class="sidebar-tag-name">Proyectos</div>
+                </div>
+                <div class="sidebar-tag">
+                    <div class="sidebar-tag-color tag-color-info"></div>
+                    <div class="sidebar-tag-name">Inspiración</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Contenido Principal -->
+    <main class="app-content">
+        <div id="main-content" class="page-transition">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

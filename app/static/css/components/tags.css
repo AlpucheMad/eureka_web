@@ -1,0 +1,178 @@
+/**
+ * Eureka - Estilos para etiquetas
+ * Definición de colores y estilos para etiquetas
+ */
+
+/* Colores de etiquetas */
+.tag-color-primary {
+    background-color: var(--color-accent);
+}
+
+.tag-color-success {
+    background-color: #52c41a;
+}
+
+.tag-color-info {
+    background-color: #1890ff;
+}
+
+.tag-color-warning {
+    background-color: #faad14;
+}
+
+.tag-color-danger {
+    background-color: #f5222d;
+}
+
+.tag-color-purple {
+    background-color: #722ed1;
+}
+
+.tag-color-cyan {
+    background-color: #13c2c2;
+}
+
+.tag-color-magenta {
+    background-color: #eb2f96;
+}
+
+.tag-color-lime {
+    background-color: #a0d911;
+}
+
+.tag-color-gold {
+    background-color: #faad14;
+}
+
+/* Estilos para etiquetas */
+.tag {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    gap: var(--spacing-xs);
+}
+
+.tag-primary {
+    background-color: rgba(var(--color-accent-rgb), 0.15);
+    color: var(--color-accent);
+}
+
+.tag-success {
+    background-color: rgba(82, 196, 26, 0.15);
+    color: #52c41a;
+}
+
+.tag-info {
+    background-color: rgba(24, 144, 255, 0.15);
+    color: #1890ff;
+}
+
+.tag-warning {
+    background-color: rgba(250, 173, 20, 0.15);
+    color: #faad14;
+}
+
+.tag-danger {
+    background-color: rgba(245, 34, 45, 0.15);
+    color: #f5222d;
+}
+
+.tag-purple {
+    background-color: rgba(114, 46, 209, 0.15);
+    color: #722ed1;
+}
+
+.tag-cyan {
+    background-color: rgba(19, 194, 194, 0.15);
+    color: #13c2c2;
+}
+
+.tag-magenta {
+    background-color: rgba(235, 47, 150, 0.15);
+    color: #eb2f96;
+}
+
+.tag-lime {
+    background-color: rgba(160, 217, 17, 0.15);
+    color: #a0d911;
+}
+
+.tag-gold {
+    background-color: rgba(250, 173, 20, 0.15);
+    color: #faad14;
+}
+
+/* Tema oscuro */
+.theme-dark .tag-primary {
+    background-color: rgba(var(--color-accent-rgb), 0.2);
+}
+
+.theme-dark .tag-success {
+    background-color: rgba(82, 196, 26, 0.2);
+}
+
+.theme-dark .tag-info {
+    background-color: rgba(24, 144, 255, 0.2);
+}
+
+.theme-dark .tag-warning {
+    background-color: rgba(250, 173, 20, 0.2);
+}
+
+.theme-dark .tag-danger {
+    background-color: rgba(245, 34, 45, 0.2);
+}
+
+.theme-dark .tag-purple {
+    background-color: rgba(114, 46, 209, 0.2);
+}
+
+.theme-dark .tag-cyan {
+    background-color: rgba(19, 194, 194, 0.2);
+}
+
+.theme-dark .tag-magenta {
+    background-color: rgba(235, 47, 150, 0.2);
+}
+
+.theme-dark .tag-lime {
+    background-color: rgba(160, 217, 17, 0.2);
+}
+
+.theme-dark .tag-gold {
+    background-color: rgba(250, 173, 20, 0.2);
+}
+
+/* Estilos para etiquetas en sidebar */
+.sidebar-tag-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.sidebar-tag {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-base);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-xs);
+    transition: background-color var(--transition-fast);
+}
+
+.sidebar-tag:hover {
+    background-color: var(--color-sec-light-1);
+}
+
+.theme-dark .sidebar-tag:hover {
+    background-color: var(--color-sec-dark-1);
+}
+
+.sidebar-tag-name {
+    font-size: var(--font-size-sm);
+} 
