@@ -1,4 +1,4 @@
-# Sesión 10 - 10 de Marzo de 2024
+# Sesión 09/3 - 9 de Marzo de 2024
 
 ## Actividades Realizadas
 
