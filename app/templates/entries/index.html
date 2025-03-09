@@ -1,0 +1,83 @@
+{% extends "base_app.html" %}
+
+{% block title %}Eureka - Mis Ideas{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Mis Ideas</h1>
+    <p>Captura y organiza tus pensamientos de forma sencilla</p>
+</div>
+
+<!-- Formulario de entrada rápida -->
+<form class="quick-entry-form" 
+      hx-post="{{ url_for('entry.quick_create') }}" 
+      hx-target="#entries-list" 
+      hx-swap="afterbegin" 
+      hx-indicator="#quick-entry-indicator">
+    <textarea name="content" class="quick-entry-input" 
+              placeholder="Escribe tu idea aquí..." 
+              rows="2" 
+              required></textarea>
+    <div class="quick-entry-actions">
+        <span id="quick-entry-indicator" class="htmx-indicator">
+            <i data-feather="loader" class="animate-spin"></i>
+        </span>
+        <button type="submit" class="btn btn-secondary">
+            <i data-feather="tag" class="mr-1"></i>
+            Etiquetar
+        </button>
+        <button type="submit" class="btn btn-primary">
+            <i data-feather="save" class="mr-1"></i>
+            Guardar
+        </button>
+    </div>
+</form>
+
+{% if entries and entries|length > 0 %}
+    <!-- Lista de entradas -->
+    <div id="entries-list" class="entries-container">
+        {% include "entries/partials/list_entries.html" %}
+    </div>
+{% else %}
+    <!-- Estado vacío -->
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i data-feather="book"></i>
+        </div>
+        <h2 class="empty-state-title">¡No hay entradas aún!</h2>
+        <p class="empty-state-text">Comienza escribiendo tu primera idea en el formulario de arriba.</p>
+        <button class="btn btn-primary" 
+                hx-get="{{ url_for('entry.new_entry') }}" 
+                hx-target="#main-content"
+                hx-push-url="true">
+            <i data-feather="plus-circle" class="mr-1"></i>
+            Crear entrada completa
+        </button>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar iconos después de cargar la página
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+        
+        // Reiniciar el formulario después de enviar
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            if (evt.detail.target.id === 'entries-list' && evt.detail.xhr.status === 200) {
+                const form = document.querySelector('.quick-entry-form');
+                if (form) {
+                    form.reset();
+                }
+                // Recargar los iconos para las nuevas entradas
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 
