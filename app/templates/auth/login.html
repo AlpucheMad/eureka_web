@@ -5,47 +5,47 @@
 {% block subtitle %}Inicia sesión para acceder a tus notas{% endblock %}
 
 {% block content %}
-    <h2 class="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200">Iniciar sesión</h2>
+    <h2>Iniciar sesión</h2>
     
-    <form method="POST" action="{{ url_for('auth.login') }}" hx-post="{{ url_for('auth.login') }}" hx-swap="outerHTML">
+    <form method="POST" action="{{ url_for('auth.login') }}" hx-post="{{ url_for('auth.login') }}" hx-swap="outerHTML" hx-target="closest form">
         {{ form.csrf_token }}
         
-        <div class="mb-4">
-            {{ form.email.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
-            {{ form.email(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
             {% if form.email.errors %}
                 {% for error in form.email.errors %}
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                    <div class="form-error">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         
-        <div class="mb-6">
-            {{ form.password.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
-            {{ form.password(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class="form-control") }}
             {% if form.password.errors %}
                 {% for error in form.password.errors %}
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                    <div class="form-error">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         
-        <div class="flex items-center mb-6">
-            {{ form.remember_me(class="h-4 w-4 text-orange-500 border-gray-300 rounded focus:ring-orange-400 dark:focus:ring-orange-800 dark:bg-gray-700 dark:border-gray-600") }}
-            {{ form.remember_me.label(class="ml-2 text-sm text-gray-700 dark:text-gray-300") }}
+        <div class="form-check">
+            {{ form.remember_me(class="form-check-input") }}
+            {{ form.remember_me.label(class="form-check-label") }}
         </div>
         
-        <div class="mb-4">
-            {{ form.submit(class="w-full py-3 px-4 bg-orange-400 hover:bg-orange-500 text-white font-medium rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 dark:bg-orange-600 dark:hover:bg-orange-700") }}
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
         </div>
     </form>
     
-    <div class="text-center text-sm mt-4">
-        <a href="{{ url_for('auth.request_reset_password') }}" class="text-orange-500 hover:text-orange-600 font-medium dark:text-orange-400 dark:hover:text-orange-300">¿Olvidaste tu contraseña?</a>
+    <div class="auth-links">
+        <a href="{{ url_for('auth.request_reset_password') }}">¿Olvidaste tu contraseña?</a>
     </div>
     
-    <div class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+    <div class="auth-links">
         ¿No tienes una cuenta? 
-        <a href="{{ url_for('auth.register') }}" class="text-orange-500 hover:text-orange-600 font-medium dark:text-orange-400 dark:hover:text-orange-300">Regístrate aquí</a>
+        <a href="{{ url_for('auth.register') }}" hx-get="{{ url_for('auth.register') }}" hx-push-url="true" hx-target="body" hx-swap="outerHTML transition:true">Regístrate aquí</a>
     </div>
 {% endblock %} 

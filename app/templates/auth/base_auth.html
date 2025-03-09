@@ -5,87 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Eureka - Tu espacio de ideas{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     <meta name="description" content="Eureka - Tu espacio personal para capturar y organizar ideas">
-    <style>
-        :root {
-            --color-accent: #F9B234;
-            --color-text-light: #333333;
-            --color-text-dark: #E0E0E0;
-            --color-bg-light: #FFFFFF;
-            --color-bg-dark: #121212;
-            --color-sec-light-1: #F5F5F5;
-            --color-sec-light-2: #E0E0E0;
-            --color-sec-dark-1: #2D2D2D;
-            --color-sec-dark-2: #3D3D3D;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .theme-light {
-            background-color: var(--color-bg-light);
-            color: var(--color-text-light);
-        }
-        .theme-dark {
-            background-color: var(--color-bg-dark);
-            color: var(--color-text-dark);
-        }
-        .accent {
-            color: var(--color-accent);
-        }
-        .btn {
-            transition: all 0.3s ease;
-        }
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .input-minimal {
-            background-color: transparent;
-            border: 1px solid #E0E0E0;
-            border-radius: 4px;
-            padding: 10px 16px;
-            transition: all 0.3s ease;
-        }
-        .input-minimal:focus {
-            border-color: var(--color-accent);
-            box-shadow: 0 0 0 2px rgba(249, 178, 52, 0.2);
-        }
-        .card-auth {
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card-auth:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
-        }
-    </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="theme-light min-h-screen flex items-center justify-center px-4">
-    <div class="w-full max-w-md">
+<body>
+    <div class="auth-container">
         <!-- Logo/Branding -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold mb-2">
+        <div class="auth-logo">
+            <h1>
                 <span class="accent">E</span>ureka
             </h1>
-            <p class="text-gray-600 dark:text-gray-400">{% block subtitle %}Tu espacio personal de ideas{% endblock %}</p>
+            <p>{% block subtitle %}Tu espacio personal de ideas{% endblock %}</p>
         </div>
         
         <!-- Mensajes Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="mb-6 space-y-2">
+                <div class="flash-messages">
                     {% for category, message in messages %}
-                        {% set alert_color = 'bg-green-50 border-green-400 text-green-700' if category == 'success' else
-                                'bg-red-50 border-red-400 text-red-700' if category == 'error' else
-                                'bg-yellow-50 border-yellow-400 text-yellow-700' if category == 'warning' else
-                                'bg-blue-50 border-blue-400 text-blue-700' %}
-                        <div class="{{ alert_color }} px-4 py-3 rounded-md border relative" role="alert">
-                            <span class="block sm:inline">{{ message }}</span>
+                        {% set alert_class = 'alert-success' if category == 'success' else
+                                             'alert-danger' if category == 'error' else
+                                             'alert-warning' if category == 'warning' else
+                                             'alert-info' %}
+                        <div class="alert {{ alert_class }}" role="alert">
+                            {{ message }}
                         </div>
                     {% endfor %}
                 </div>
@@ -93,16 +38,41 @@
         {% endwith %}
         
         <!-- Contenido principal -->
-        <div class="card-auth bg-white p-8 rounded-lg border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <div class="auth-card">
             {% block content %}{% endblock %}
         </div>
         
         <!-- Footer -->
-        <div class="mt-8 text-center text-sm text-gray-500">
-            © Eureka {{ now.year }} · <a href="#" class="text-accent hover:underline">Términos</a> · <a href="#" class="text-accent hover:underline">Privacidad</a>
+        <div class="auth-footer">
+            © Eureka {{ now.year }} · <a href="{{ url_for('main.terms') }}">Términos</a> · <a href="{{ url_for('main.privacy') }}">Privacidad</a>
         </div>
     </div>
     
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+    <script>
+        // Animaciones y transiciones con HTMX
+        document.addEventListener('htmx:configRequest', function(evt) {
+            // Añadir loader si se necesita
+            const submitBtn = evt.detail.elt.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<span class="loader"></span> Procesando...';
+                submitBtn.disabled = true;
+            }
+        });
+        
+        document.addEventListener('htmx:afterSwap', function(evt) {
+            // Animación después de la carga
+            const elements = document.querySelectorAll('.auth-card, .auth-logo');
+            elements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 50);
+            });
+        });
+    </script>
+    {% endblock %}
 </body>
 </html> 

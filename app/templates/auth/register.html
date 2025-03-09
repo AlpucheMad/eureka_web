@@ -5,59 +5,59 @@
 {% block subtitle %}Crea tu cuenta en Eureka{% endblock %}
 
 {% block content %}
-    <h2 class="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200">Crear cuenta</h2>
+    <h2>Crear cuenta</h2>
     
-    <form method="POST" action="{{ url_for('auth.register') }}" hx-post="{{ url_for('auth.register') }}" hx-swap="outerHTML">
+    <form method="POST" action="{{ url_for('auth.register') }}" hx-post="{{ url_for('auth.register') }}" hx-swap="outerHTML" hx-target="closest form">
         {{ form.csrf_token }}
         
-        <div class="mb-4">
-            {{ form.username.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
-            {{ form.username(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+        <div class="form-group">
+            {{ form.username.label }}
+            {{ form.username(class="form-control") }}
             {% if form.username.errors %}
                 {% for error in form.username.errors %}
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                    <div class="form-error">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         
-        <div class="mb-4">
-            {{ form.email.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
-            {{ form.email(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
             {% if form.email.errors %}
                 {% for error in form.email.errors %}
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                    <div class="form-error">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         
-        <div class="mb-4">
-            {{ form.password.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
-            {{ form.password(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class="form-control") }}
             {% if form.password.errors %}
                 {% for error in form.password.errors %}
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                    <div class="form-error">{{ error }}</div>
                 {% endfor %}
             {% endif %}
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">La contraseña debe tener al menos 8 caracteres, una letra minúscula, una mayúscula, un número y un carácter especial.</p>
+            <div class="form-text">La contraseña debe tener al menos 8 caracteres, una letra minúscula, una mayúscula, un número y un carácter especial.</div>
         </div>
         
-        <div class="mb-6">
-            {{ form.password_confirm.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
-            {{ form.password_confirm(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+        <div class="form-group">
+            {{ form.password_confirm.label }}
+            {{ form.password_confirm(class="form-control") }}
             {% if form.password_confirm.errors %}
                 {% for error in form.password_confirm.errors %}
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                    <div class="form-error">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         
-        <div class="mb-4">
-            {{ form.submit(class="w-full py-3 px-4 bg-orange-400 hover:bg-orange-500 text-white font-medium rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 dark:bg-orange-600 dark:hover:bg-orange-700") }}
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
         </div>
     </form>
     
-    <div class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+    <div class="auth-links">
         ¿Ya tienes una cuenta? 
-        <a href="{{ url_for('auth.login') }}" class="text-orange-500 hover:text-orange-600 font-medium dark:text-orange-400 dark:hover:text-orange-300">Inicia sesión aquí</a>
+        <a href="{{ url_for('auth.login') }}" hx-get="{{ url_for('auth.login') }}" hx-push-url="true" hx-target="body" hx-swap="outerHTML transition:true">Inicia sesión aquí</a>
     </div>
 {% endblock %} 
