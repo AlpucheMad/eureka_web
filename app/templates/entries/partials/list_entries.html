@@ -1,0 +1,270 @@
+<!-- Cabecera de sección -->
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Mis Entradas</h1>
+    <a href="{{ url_for('entry.new_entry') }}" class="btn btn-primary flex items-center"
+       hx-get="{{ url_for('entry.new_entry_partial') }}" 
+       hx-target="#main-content"
+       hx-push-url="{{ url_for('entry.new_entry') }}">
+        <i data-feather="plus" class="mr-2"></i>
+        Nueva entrada
+    </a>
+</div>
+
+<!-- Grid de entradas -->
+<div class="entries-container">
+    {% for entry in entries %}
+    <div class="entry-card" id="entry-{{ entry.id }}">
+        <a href="{{ url_for('entry.view_entry', entry_id=entry.id) }}"
+           hx-get="{{ url_for('entry.view_entry_partial', entry_id=entry.id) }}"
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.view_entry', entry_id=entry.id) }}"
+           class="entry-card-link">
+            <div class="entry-card-content">
+                <div class="entry-card-header">
+                    <h3 class="entry-card-title">
+                        {% if entry.title %}
+                            {{ entry.title }}
+                        {% else %}
+                            {{ entry.content[:50] ~ ('...' if entry.content|length > 50 else '') }}
+                        {% endif %}
+                    </h3>
+                    <div class="entry-card-date">
+                        {{ entry.updated_at.strftime('%d/%m/%Y %H:%M') if entry.updated_at else entry.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                </div>
+                <div class="entry-card-preview">
+                    {% if entry.content %}
+                        {{ entry.content[:200] ~ ('...' if entry.content|length > 200 else '') }}
+                    {% endif %}
+                </div>
+                {% if entry.tags and entry.tags|length > 0 %}
+                <div class="entry-card-tags">
+                    {% for tag in entry.tags %}
+                    <span class="tag tag-primary">
+                        {{ tag.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </a>
+        <div class="entry-card-actions">
+            <button class="entry-card-action" 
+                    aria-label="Editar"
+                    hx-get="{{ url_for('entry.edit_entry_partial', entry_id=entry.id) }}"
+                    hx-target="#main-content"
+                    hx-push-url="{{ url_for('entry.edit_entry', entry_id=entry.id) }}">
+                <i data-feather="edit-2"></i>
+            </button>
+            <button class="entry-card-action" 
+                    aria-label="Eliminar"
+                    hx-post="{{ url_for('entry.delete_entry', entry_id=entry.id) }}"
+                    hx-confirm="¿Estás seguro de que quieres mover esta entrada a la papelera?"
+                    hx-target="#entry-{{ entry.id }}"
+                    hx-swap="outerHTML fade-out">
+                <i data-feather="trash"></i>
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i data-feather="file-text"></i>
+        </div>
+        <h2 class="empty-state-title">Aún no has creado ninguna entrada</h2>
+        <p class="empty-state-text">Comienza a capturar tus ideas, notas y pensamientos.</p>
+        <a href="{{ url_for('entry.new_entry') }}" class="btn btn-primary"
+           hx-get="{{ url_for('entry.new_entry_partial') }}" 
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.new_entry') }}">
+            <i data-feather="plus" class="mr-2"></i>
+            Crear mi primera entrada
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Paginación -->
+{% if entries.pages > 1 %}
+<div class="mt-8 flex justify-center">
+    <nav class="flex">
+        {% if entries.has_prev %}
+        <a hx-get="{{ url_for('entry.list_entries_partial', page=entries.prev_num) }}" 
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.list_entries', page=entries.prev_num) }}"
+           class="btn btn-secondary mr-1">
+            Anterior
+        </a>
+        {% else %}
+        <span class="btn btn-secondary mr-1 opacity-50 cursor-not-allowed">
+            Anterior
+        </span>
+        {% endif %}
+        
+        {% for page_num in entries.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == entries.page %}
+                <span class="btn btn-primary mx-1">
+                    {{ page_num }}
+                </span>
+                {% else %}
+                <a hx-get="{{ url_for('entry.list_entries_partial', page=page_num) }}" 
+                   hx-target="#main-content"
+                   hx-push-url="{{ url_for('entry.list_entries', page=page_num) }}"
+                   class="btn btn-secondary mx-1">
+                    {{ page_num }}
+                </a>
+                {% endif %}
+            {% else %}
+            <span class="mx-1 flex items-center">
+                ...
+            </span>
+            {% endif %}
+        {% endfor %}
+        
+        {% if entries.has_next %}
+        <a hx-get="{{ url_for('entry.list_entries_partial', page=entries.next_num) }}" 
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.list_entries', page=entries.next_num) }}"
+           class="btn btn-secondary ml-1">
+            Siguiente
+        </a>
+        {% else %}
+        <span class="btn btn-secondary ml-1 opacity-50 cursor-not-allowed">
+            Siguiente
+        </span>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+
+<style>
+    .entry-card {
+        background-color: var(--color-bg-light);
+        border: 1px solid var(--color-sec-light-2);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+    }
+    
+    .theme-dark .entry-card {
+        background-color: var(--color-bg-dark);
+        border-color: var(--color-sec-dark-1);
+    }
+    
+    .entry-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--color-accent);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .entry-card-link {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+        padding: var(--spacing-lg);
+        flex-grow: 1;
+    }
+    
+    .entry-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .entry-card-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin: 0;
+        line-height: 1.4;
+    }
+    
+    .entry-card-date {
+        font-size: var(--font-size-xs);
+        color: var(--color-text-light);
+        opacity: 0.7;
+        white-space: nowrap;
+        margin-left: var(--spacing-sm);
+    }
+    
+    .theme-dark .entry-card-date {
+        color: var(--color-text-dark);
+    }
+    
+    .entry-card-preview {
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--spacing-md);
+        line-height: 1.5;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+    }
+    
+    .entry-card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+        margin-top: var(--spacing-sm);
+    }
+    
+    .entry-tag {
+        font-size: var(--font-size-xs);
+        background-color: color-mix(in srgb, var(--tag-color, var(--color-accent)) 15%, transparent);
+        color: var(--tag-color, var(--color-accent));
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--border-radius-md);
+        display: inline-flex;
+        align-items: center;
+        transition: background-color var(--transition-fast);
+    }
+    
+    .theme-dark .entry-tag {
+        background-color: color-mix(in srgb, var(--tag-color, var(--color-accent)) 20%, var(--color-bg-dark));
+    }
+    
+    .entry-card-actions {
+        display: flex;
+        border-top: 1px solid var(--color-sec-light-2);
+        background-color: var(--color-sec-light-1);
+    }
+    
+    .theme-dark .entry-card-actions {
+        border-top-color: var(--color-sec-dark-1);
+        background-color: var(--color-sec-dark-1);
+    }
+    
+    .entry-card-action {
+        flex: 1;
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        padding: var(--spacing-sm);
+        transition: background-color var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .entry-card-action:hover {
+        background-color: var(--color-sec-light-2);
+    }
+    
+    .theme-dark .entry-card-action:hover {
+        background-color: var(--color-sec-dark-2);
+    }
+    
+    .entry-card-action:first-child {
+        border-right: 1px solid var(--color-sec-light-2);
+    }
+    
+    .theme-dark .entry-card-action:first-child {
+        border-right-color: var(--color-sec-dark-1);
+    }
+</style> 

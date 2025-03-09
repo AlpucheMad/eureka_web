@@ -1,0 +1,232 @@
+<!-- Formulario de entrada con HTMX -->
+<div class="entry-edit-form">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">{{ 'Editar entrada' if entry else 'Nueva entrada' }}</h1>
+        <a href="{{ url_for('entry.list_entries') }}" 
+           class="btn btn-secondary"
+           hx-get="{{ url_for('entry.list_entries_partial') }}"
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.list_entries') }}">
+            <i data-feather="x" class="mr-2"></i>
+            Cancelar
+        </a>
+    </div>
+    
+    <form id="entry-form" 
+          hx-post="{{ url_for('entry.update_entry', entry_id=entry.id) if entry else url_for('entry.create_entry') }}"
+          hx-target="#main-content"
+          hx-push-url="{{ url_for('entry.view_entry', entry_id=entry.id) if entry else url_for('entry.list_entries') }}">
+        
+        <div class="mb-4">
+            <label for="title" class="block text-sm font-medium mb-1">Título</label>
+            <input type="text" 
+                   id="title" 
+                   name="title" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                   value="{{ entry.title if entry else '' }}"
+                   placeholder="Título de la entrada">
+        </div>
+        
+        <div class="mb-4">
+            <label for="content" class="block text-sm font-medium mb-1">Contenido</label>
+            <textarea id="content" 
+                      name="content" 
+                      rows="15"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent font-mono"
+                      placeholder="Escribe aquí el contenido de tu entrada...">{{ entry.content if entry else '' }}</textarea>
+        </div>
+        
+        <div class="mb-6">
+            <label for="tags" class="block text-sm font-medium mb-1">Etiquetas</label>
+            <input type="text" 
+                   id="tags" 
+                   name="tags" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                   value="{{ tags if tags else '' }}"
+                   placeholder="Etiquetas separadas por comas (ej: trabajo, ideas, proyecto)">
+            <p class="text-sm text-gray-500 mt-1">Separa las etiquetas con comas</p>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+            <button type="button" 
+                    class="btn btn-secondary"
+                    hx-get="{{ url_for('entry.view_entry_partial', entry_id=entry.id) if entry else url_for('entry.list_entries_partial') }}"
+                    hx-target="#main-content"
+                    hx-push-url="{{ url_for('entry.view_entry', entry_id=entry.id) if entry else url_for('entry.list_entries') }}">
+                Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+                {{ 'Guardar cambios' if entry else 'Crear entrada' }}
+            </button>
+        </div>
+    </form>
+    
+    <!-- Guía de Markdown -->
+    <div class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium mb-2">Guía de Markdown</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h4 class="text-sm font-medium mb-1">Formato básico</h4>
+                <ul class="text-sm space-y-1">
+                    <li><code>**texto**</code> - <strong>negrita</strong></li>
+                    <li><code>*texto*</code> - <em>cursiva</em></li>
+                    <li><code># Título</code> - Título principal</li>
+                    <li><code>## Subtítulo</code> - Subtítulo</li>
+                    <li><code>[enlace](url)</code> - <a href="#">enlace</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium mb-1">Listas y bloques</h4>
+                <ul class="text-sm space-y-1">
+                    <li><code>- elemento</code> - Lista con viñetas</li>
+                    <li><code>1. elemento</code> - Lista numerada</li>
+                    <li><code>```código```</code> - Bloque de código</li>
+                    <li><code>> cita</code> - Bloque de cita</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mensaje de error si existe -->
+{% if error %}
+<div class="mt-4 p-4 bg-red-100 text-red-700 border-l-4 border-red-500 rounded">
+    {{ error }}
+</div>
+{% endif %}
+
+<!-- Script para EasyMDE y autoguardado -->
+<script>
+    // Inicializar EasyMDE
+    var easyMDE = new EasyMDE({
+        element: document.getElementById('content'),
+        autosave: {
+            enabled: false,  // Lo gestionaremos nosotros con HTMX
+            delay: 30000
+        },
+        spellChecker: false,
+        status: ["lines", "words", "cursor"],
+        toolbar: [
+            "bold", "italic", "heading", "|", 
+            "quote", "unordered-list", "ordered-list", "|", 
+            "link", "image", "table", "|", 
+            "preview", "side-by-side", "fullscreen", "|", 
+            "guide"
+        ],
+        placeholder: "Escribe tus ideas en formato Markdown...",
+        shortcuts: {
+            "toggleFullScreen": null,  // Desactivar Ctrl+Enter para pantalla completa
+        }
+    });
+    
+    // Sistema de guardado automático
+    let saveTimeout;
+    let autoSaveEnabled = true;
+    let entryId = document.getElementById('entry_id').value;
+    let lastSavedAt = new Date();
+    
+    function updateSaveStatus(status, isError = false) {
+        const saveStatus = document.getElementById('save-status');
+        const saveIcon = saveStatus.querySelector('.save-icon');
+        const saveText = saveStatus.querySelector('.save-text');
+        
+        saveText.innerText = status;
+        
+        if (status === '') {
+            saveIcon.classList.add('hidden');
+        } else {
+            saveIcon.classList.remove('hidden');
+        }
+        
+        if (isError) {
+            saveText.classList.add('text-red-600');
+            saveIcon.classList.add('text-red-600');
+        } else {
+            saveText.classList.remove('text-red-600');
+            saveIcon.classList.remove('text-red-600');
+        }
+    }
+    
+    function scheduleAutoSave() {
+        if (!autoSaveEnabled) return;
+        
+        // Limpiar timer anterior
+        if (saveTimeout) clearTimeout(saveTimeout);
+        
+        // Mostrar estado de guardado
+        updateSaveStatus('Guardando...');
+        
+        // Programar nuevo guardado
+        saveTimeout = setTimeout(autoSave, 2000);  // Debounce
+    }
+    
+    function autoSave() {
+        if (!autoSaveEnabled) return;
+        
+        const title = document.getElementById('title').value.trim();
+        const content = easyMDE.value().trim();
+        
+        if (!title && !content) {
+            updateSaveStatus('');
+            return;
+        }
+        
+        // Preparar datos
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+        
+        // Realizar solicitud AJAX para autoguardado
+        fetch(`/entries/${entryId === '0' ? '0' : entryId}/autosave`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'HX-Request': 'true',
+                'HX-Trigger': 'save-form'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Si es una entrada nueva, actualizar el ID
+                if (data.is_new) {
+                    entryId = data.entry_id;
+                    document.getElementById('entry_id').value = entryId;
+                    
+                    // Actualizar URL del formulario
+                    document.getElementById('entry-form').setAttribute('hx-post', `/entries/${entryId}`);
+                    
+                    // Actualizar historial del navegador sin recargar
+                    window.history.replaceState(null, null, `/entries/${entryId}/edit`);
+                }
+                
+                lastSavedAt = new Date();
+                updateSaveStatus(`Guardado: ${data.last_saved || lastSavedAt.toLocaleTimeString()}`);
+                
+                // Ocultar estado después de un tiempo
+                setTimeout(() => {
+                    updateSaveStatus('');
+                }, 3000);
+            } else {
+                updateSaveStatus('Error al guardar', true);
+            }
+        })
+        .catch(error => {
+            console.error('Error al guardar:', error);
+            updateSaveStatus('Error al guardar', true);
+        });
+    }
+    
+    // Vincular eventos para autoguardado
+    document.getElementById('title').addEventListener('input', scheduleAutoSave);
+    easyMDE.codemirror.on('change', scheduleAutoSave);
+    
+    // Ajustar altura del editor para llenar el espacio disponible
+    setTimeout(() => {
+        const editor = document.querySelector('.CodeMirror');
+        if (editor) {
+            editor.style.height = 'calc(70vh - 100px)';
+        }
+    }, 100);
+</script> 

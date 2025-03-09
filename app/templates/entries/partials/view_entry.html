@@ -1,0 +1,65 @@
+<!-- Vista de entrada individual -->
+<div class="entry-view">
+    <div class="entry-view-header">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="entry-view-title">{{ entry.title }}</h1>
+            <div class="flex gap-2">
+                <a href="{{ url_for('entry.edit_entry', entry_id=entry.id) }}" 
+                   class="btn btn-secondary"
+                   hx-get="{{ url_for('entry.edit_entry_partial', entry_id=entry.id) }}"
+                   hx-target="#main-content"
+                   hx-push-url="{{ url_for('entry.edit_entry', entry_id=entry.id) }}">
+                    <i data-feather="edit-2" class="mr-2"></i>
+                    Editar
+                </a>
+                <button class="btn btn-secondary"
+                        hx-post="{{ url_for('entry.delete_entry', entry_id=entry.id) }}"
+                        hx-confirm="¿Estás seguro de que quieres mover esta entrada a la papelera?"
+                        hx-target="#main-content"
+                        hx-push-url="{{ url_for('entry.list_entries') }}"
+                        hx-swap="innerHTML">
+                    <i data-feather="trash" class="mr-2"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+        
+        <div class="entry-view-meta">
+            <div class="flex items-center">
+                <i data-feather="calendar" class="mr-2" style="width: 16px; height: 16px;"></i>
+                <span>Creado: {{ entry.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+            </div>
+            {% if entry.updated_at and entry.updated_at != entry.created_at %}
+            <div class="flex items-center">
+                <i data-feather="edit" class="mr-2" style="width: 16px; height: 16px;"></i>
+                <span>Actualizado: {{ entry.updated_at.strftime('%d/%m/%Y %H:%M') }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if entry.tags and entry.tags|length > 0 %}
+        <div class="flex flex-wrap gap-2 mt-4">
+            {% for tag in entry.tags %}
+            <span class="tag tag-primary">
+                {{ tag.name }}
+            </span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="entry-view-content">
+        {{ html_content|safe }}
+    </div>
+    
+    <div class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <a href="{{ url_for('entry.list_entries') }}" 
+           class="btn btn-secondary"
+           hx-get="{{ url_for('entry.list_entries_partial') }}"
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.list_entries') }}">
+            <i data-feather="arrow-left" class="mr-2"></i>
+            Volver a la lista
+        </a>
+    </div>
+</div> 

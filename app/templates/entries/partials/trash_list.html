@@ -1,0 +1,137 @@
+<!-- Cabecera de sección -->
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Papelera</h1>
+    <a href="{{ url_for('entry.list_entries') }}" 
+       class="btn btn-secondary"
+       hx-get="{{ url_for('entry.list_entries_partial') }}"
+       hx-target="#main-content"
+       hx-push-url="{{ url_for('entry.list_entries') }}">
+        <i data-feather="arrow-left" class="mr-2"></i>
+        Volver a entradas
+    </a>
+</div>
+
+<!-- Grid de entradas -->
+<div class="entries-container">
+    {% for entry in entries %}
+    <div class="entry-card" id="entry-{{ entry.id }}">
+        <div class="entry-card-link">
+            <div class="entry-card-content">
+                <div class="entry-card-header">
+                    <h3 class="entry-card-title">
+                        {% if entry.title %}
+                            {{ entry.title }}
+                        {% else %}
+                            {{ entry.content[:50] ~ ('...' if entry.content|length > 50 else '') }}
+                        {% endif %}
+                    </h3>
+                    <div class="entry-card-date">
+                        {{ entry.updated_at.strftime('%d/%m/%Y %H:%M') if entry.updated_at else entry.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                </div>
+                <div class="entry-card-preview">
+                    {% if entry.content %}
+                        {{ entry.content[:200] ~ ('...' if entry.content|length > 200 else '') }}
+                    {% endif %}
+                </div>
+                {% if entry.tags and entry.tags|length > 0 %}
+                <div class="entry-card-tags">
+                    {% for tag in entry.tags %}
+                    <span class="tag tag-primary">
+                        {{ tag.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="entry-card-actions">
+            <button class="entry-card-action" 
+                    aria-label="Restaurar"
+                    hx-post="{{ url_for('entry.restore_entry', entry_id=entry.id) }}"
+                    hx-target="#entry-{{ entry.id }}"
+                    hx-swap="outerHTML fade-out">
+                <i data-feather="refresh-cw"></i>
+            </button>
+            <button class="entry-card-action text-red-600" 
+                    aria-label="Eliminar permanentemente"
+                    hx-delete="{{ url_for('entry.delete_entry', entry_id=entry.id, permanent=True) }}"
+                    hx-confirm="¿Estás seguro de que quieres eliminar permanentemente esta entrada? Esta acción no se puede deshacer."
+                    hx-target="#entry-{{ entry.id }}"
+                    hx-swap="outerHTML fade-out">
+                <i data-feather="trash-2"></i>
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i data-feather="trash-2"></i>
+        </div>
+        <h2 class="empty-state-title">La papelera está vacía</h2>
+        <p class="empty-state-text">No hay entradas en la papelera.</p>
+        <a href="{{ url_for('entry.list_entries') }}" 
+           class="btn btn-primary"
+           hx-get="{{ url_for('entry.list_entries_partial') }}"
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.list_entries') }}">
+            <i data-feather="arrow-left" class="mr-2"></i>
+            Volver a entradas
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Paginación -->
+{% if entries.pages > 1 %}
+<div class="mt-8 flex justify-center">
+    <nav class="flex">
+        {% if entries.has_prev %}
+        <a hx-get="{{ url_for('entry.trash_partial', page=entries.prev_num) }}" 
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.trash', page=entries.prev_num) }}"
+           class="btn btn-secondary mr-1">
+            Anterior
+        </a>
+        {% else %}
+        <span class="btn btn-secondary mr-1 opacity-50 cursor-not-allowed">
+            Anterior
+        </span>
+        {% endif %}
+        
+        {% for page_num in entries.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == entries.page %}
+                <span class="btn btn-primary mx-1">
+                    {{ page_num }}
+                </span>
+                {% else %}
+                <a hx-get="{{ url_for('entry.trash_partial', page=page_num) }}" 
+                   hx-target="#main-content"
+                   hx-push-url="{{ url_for('entry.trash', page=page_num) }}"
+                   class="btn btn-secondary mx-1">
+                    {{ page_num }}
+                </a>
+                {% endif %}
+            {% else %}
+            <span class="mx-1 flex items-center">
+                ...
+            </span>
+            {% endif %}
+        {% endfor %}
+        
+        {% if entries.has_next %}
+        <a hx-get="{{ url_for('entry.trash_partial', page=entries.next_num) }}" 
+           hx-target="#main-content"
+           hx-push-url="{{ url_for('entry.trash', page=entries.next_num) }}"
+           class="btn btn-secondary ml-1">
+            Siguiente
+        </a>
+        {% else %}
+        <span class="btn btn-secondary ml-1 opacity-50 cursor-not-allowed">
+            Siguiente
+        </span>
+        {% endif %}
+    </nav>
+</div>
+{% endif %} 
