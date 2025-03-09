@@ -3,14 +3,17 @@ Modelo de entrada para la aplicación Eureka.
 """
 
 from datetime import datetime
-from sqlalchemy import Index, ForeignKey, Enum
+from sqlalchemy import Index, ForeignKey, String, event
 import enum
+import os
 
 from app import db
 
+# Definición de constantes para estados en lugar de ENUM de base de datos
 class EntryStatus(enum.Enum):
     """
     Enumeración para los posibles estados de una entrada.
+    Solo se usa para validación en Python, no crea tipo ENUM en la base de datos.
     """
     BORRADOR = 'borrador'
     PUBLICADO = 'publicado'
@@ -25,9 +28,11 @@ class Entry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    
+    # Usar String en lugar de Enum para evitar problemas de permisos
     status = db.Column(
-        Enum(EntryStatus),
-        default=EntryStatus.BORRADOR,
+        String(50),
+        default=EntryStatus.BORRADOR.value,
         nullable=False
     )
     
@@ -74,14 +79,14 @@ class Entry(db.Model):
         """
         Cambia el estado de la entrada a publicado.
         """
-        self.status = EntryStatus.PUBLICADO
+        self.status = EntryStatus.PUBLICADO.value
         self.updated_at = datetime.utcnow()
     
     def draft(self):
         """
         Cambia el estado de la entrada a borrador.
         """
-        self.status = EntryStatus.BORRADOR
+        self.status = EntryStatus.BORRADOR.value
         self.updated_at = datetime.utcnow()
     
     def add_tag(self, tag):
@@ -102,4 +107,19 @@ class Entry(db.Model):
         """
         Representación en string del modelo.
         """
-        return f'<Entry {self.title} (Status: {self.status.value})>' 
+        return f'<Entry {self.title} (Status: {self.status})>'
+
+# Agregar validación para asegurar que solo se usen valores válidos de EntryStatus
+@event.listens_for(Entry.status, 'set', retval=True)
+def validate_status(target, value, oldvalue, initiator):
+    """Valida que el estado de la entrada sea uno de los valores permitidos."""
+    # Si ya es un valor de enum, obtener su value
+    if hasattr(value, 'value'):
+        value = value.value
+    
+    # Verificar que sea un valor válido
+    valid_values = [e.value for e in EntryStatus]
+    if value not in valid_values:
+        raise ValueError(f"Estado inválido. Debe ser uno de: {', '.join(valid_values)}")
+    
+    return value 

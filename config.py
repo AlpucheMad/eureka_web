@@ -43,6 +43,11 @@ class TestingConfig(Config):
     TESTING = True
     DB_NAME = os.environ.get('TEST_DB_NAME', 'eureka_test')
     SQLALCHEMY_DATABASE_URI = f"postgresql://{Config.DB_USER}:{Config.DB_PASSWORD_ENCODED}@{Config.DB_HOST}:{Config.DB_PORT}/{DB_NAME}"
+    
+    # Configuraciones para construcción de URLs en tests
+    SERVER_NAME = 'localhost:5000'
+    APPLICATION_ROOT = '/'
+    PREFERRED_URL_SCHEME = 'http'
 
 class ProductionConfig(Config):
     DB_NAME = os.environ.get('PROD_DB_NAME', 'eureka')

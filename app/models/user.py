@@ -3,12 +3,14 @@ Modelo de usuario para la aplicación Eureka.
 """
 
 from datetime import datetime
+import uuid
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import Index
+from flask_login import UserMixin
 
 from app import db, bcrypt
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     """
     Modelo de usuario que almacena la información de autenticación y preferencias.
     """
@@ -22,6 +24,9 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
     
+    # Campo requerido por Flask-Security-Too desde la versión 4.0.0
+    fs_uniquifier = db.Column(db.String(64), unique=True, nullable=False, default=lambda: uuid.uuid4().hex)
+    
     # Campos de auditoría
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
@@ -32,6 +37,10 @@ class User(db.Model):
     # Soft delete
     is_deleted = db.Column(db.Boolean, default=False, nullable=False)
     deleted_at = db.Column(db.DateTime, nullable=True)
+    
+    # Roles (requerido por Flask-Security)
+    roles = db.relationship('Role', secondary='roles_users',
+                          backref=db.backref('users', lazy='dynamic'))
     
     # Relaciones
     collections = db.relationship('Collection', back_populates='user', lazy='dynamic',
@@ -46,6 +55,26 @@ class User(db.Model):
         Index('idx_user_username_email', 'username', 'email'),
         Index('idx_user_active_verified', 'is_active', 'is_verified'),
     )
+    
+    def get_id(self):
+        """
+        Método requerido por Flask-Login.
+        """
+        return str(self.id)
+    
+    @property
+    def is_authenticated(self):
+        """
+        Método requerido por Flask-Login.
+        """
+        return True
+    
+    @property
+    def is_anonymous(self):
+        """
+        Método requerido por Flask-Login.
+        """
+        return False
     
     @hybrid_property
     def password(self):
@@ -79,4 +108,24 @@ class User(db.Model):
         """
         Representación en string del modelo.
         """
-        return f'<User {self.username}>' 
+        return f'<User {self.username}>'
+
+# Modelo de Role requerido por Flask-Security
+class Role(db.Model):
+    """
+    Modelo de rol para la gestión de permisos.
+    """
+    __tablename__ = 'roles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+    
+    def __repr__(self):
+        return f'<Role {self.name}>'
+
+# Tabla de asociación entre usuarios y roles
+roles_users = db.Table('roles_users',
+    db.Column('user_id', db.Integer(), db.ForeignKey('users.id')),
+    db.Column('role_id', db.Integer(), db.ForeignKey('roles.id'))
+) 
