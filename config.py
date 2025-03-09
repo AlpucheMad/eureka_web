@@ -18,17 +18,14 @@ class Config:
     
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        f"postgresql://{os.environ.get('DB_USER', 'eureka_user')}:{os.environ.get('DB_PASSWORD', 'Eur3ka_S3cure_P@ss')}@{os.environ.get('DB_HOST', 'localhost')}:{os.environ.get('DB_PORT', '5433')}/{os.environ.get('DB_NAME', 'eureka_dev')}"
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL')
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-        f"postgresql://{os.environ.get('DB_USER', 'eureka_user')}:{os.environ.get('DB_PASSWORD', 'Eur3ka_S3cure_P@ss')}@{os.environ.get('DB_HOST', 'localhost')}:{os.environ.get('DB_PORT', '5433')}/eureka_test"
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL')
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        f"postgresql://{os.environ.get('DB_USER', 'eureka_user')}:{os.environ.get('DB_PASSWORD', 'Eur3ka_S3cure_P@ss')}@{os.environ.get('DB_HOST', 'localhost')}:{os.environ.get('DB_PORT', '5433')}/eureka"
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
 config = {
     'development': DevelopmentConfig,
