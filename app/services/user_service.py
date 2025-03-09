@@ -150,4 +150,17 @@ class UserService:
             Exception: Si el token es inválido o ha expirado.
         """
         serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
-        return serializer.loads(token, salt=salt, max_age=expiration) 
+        return serializer.loads(token, salt=salt, max_age=expiration)
+        
+    def verify_password(self, user, password):
+        """
+        Verifica si la contraseña proporcionada coincide con la almacenada para el usuario.
+        
+        Args:
+            user (User): Usuario cuya contraseña se verificará.
+            password (str): Contraseña en texto plano a verificar.
+            
+        Returns:
+            bool: True si la contraseña es correcta, False en caso contrario.
+        """
+        return user.verify_password(password) 

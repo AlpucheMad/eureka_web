@@ -8,12 +8,20 @@
 <div class="auth-card">
     <h2>Iniciar sesión</h2>
     
-    <form method="POST" action="{{ url_for('auth.login') }}" hx-post="{{ url_for('auth.login') }}" hx-swap="outerHTML" hx-target="closest form">
+    <form id="login-form"
+          method="POST" 
+          action="{{ url_for('auth.login') }}" 
+          hx-post="{{ url_for('auth.login') }}" 
+          hx-swap="outerHTML" 
+          hx-target="#login-form"
+          hx-indicator="#form-indicator"
+          hx-push-url="false">
+          
         {{ form.csrf_token }}
         
         <div class="form-group">
             {{ form.email.label }}
-            {{ form.email(class="form-control") }}
+            {{ form.email(class="form-control", placeholder="correo@ejemplo.com", autocomplete="email", required=true) }}
             {% if form.email.errors %}
                 {% for error in form.email.errors %}
                     <div class="form-error">{{ error }}</div>
@@ -23,7 +31,7 @@
         
         <div class="form-group">
             {{ form.password.label }}
-            {{ form.password(class="form-control") }}
+            {{ form.password(class="form-control", autocomplete="current-password", required=true) }}
             {% if form.password.errors %}
                 {% for error in form.password.errors %}
                     <div class="form-error">{{ error }}</div>
@@ -37,17 +45,45 @@
         </div>
         
         <div class="form-group">
-            {{ form.submit(class="btn btn-primary") }}
+            <button type="submit" class="btn btn-primary">
+                <span id="form-indicator" class="htmx-indicator spinner"></span>
+                Iniciar sesión
+            </button>
         </div>
     </form>
     
     <div class="auth-links">
-        <a href="{{ url_for('auth.request_reset_password') }}">¿Olvidaste tu contraseña?</a>
+        <a href="{{ url_for('auth.request_reset_password') }}"
+           hx-get="{{ url_for('auth.request_reset_password') }}"
+           hx-push-url="true"
+           hx-target="main"
+           hx-swap="outerHTML transition:true">¿Olvidaste tu contraseña?</a>
     </div>
     
     <div class="auth-links">
-        ¿No tienes una cuenta? 
-        <a href="{{ url_for('auth.register') }}" hx-get="{{ url_for('auth.register') }}" hx-push-url="true" hx-target="body" hx-swap="outerHTML transition:true">Regístrate aquí</a>
+        ¿No tienes una cuenta?
+        <a href="{{ url_for('auth.register') }}"
+           hx-get="{{ url_for('auth.register') }}"
+           hx-push-url="true"
+           hx-target="main"
+           hx-swap="outerHTML transition:true">Regístrate aquí</a>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enfocar automáticamente el campo de email al cargar
+        document.getElementById('email').focus();
+        
+        // Detectar cuando se envía el formulario con Enter
+        document.getElementById('login-form').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.submit();
+            }
+        });
+    });
+</script>
 {% endblock %} 

@@ -1,7 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
-from flask_security import login_required, current_user
-from flask_security.utils import login_user, logout_user, verify_password, hash_password
-from flask_security.decorators import anonymous_user_required
+from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 
 from app.forms.auth_forms import LoginForm, RegistrationForm, RequestResetPasswordForm, ResetPasswordForm
@@ -12,17 +10,26 @@ from app.utils.security import limiter
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 user_service = UserService()
 
+# Decorador personalizado para usuarios no autenticados
+def anonymous_required(f):
+    def wrapped(*args, **kwargs):
+        if current_user.is_authenticated:
+            return redirect(url_for('main.app_shell'))
+        return f(*args, **kwargs)
+    wrapped.__name__ = f.__name__
+    return wrapped
+
 @auth.route('/login', methods=['GET', 'POST'])
-@anonymous_user_required
-@limiter.limit("5 per 5 minutes")
+@anonymous_required
+@limiter.limit("30 per minute")
 def login():
-    """Ruta para iniciar sesión."""
+    """Ruta para iniciar sesión."""        
     form = LoginForm()
     
     if form.validate_on_submit():
         user = user_service.get_user_by_email(form.email.data)
         
-        if user and user.verify_password(form.password.data):
+        if user and user_service.verify_password(user, form.password.data):
             if not user.is_verified:
                 flash('Por favor, verifica tu correo electrónico antes de iniciar sesión.', 'warning')
                 return render_template('auth/login.html', form=form, now=datetime.now())
@@ -31,16 +38,26 @@ def login():
                 flash('Tu cuenta está desactivada. Contacta con el administrador.', 'error')
                 return render_template('auth/login.html', form=form, now=datetime.now())
                 
+            # Iniciar sesión
             login_user(user, remember=form.remember_me.data)
             user_service.update_last_login(user)
             
+            # Obtener la página de redirección
             next_page = request.args.get('next')
+            
+            # Notificar al usuario
             flash('Has iniciado sesión correctamente.', 'success')
-            return redirect(next_page or url_for('main.index'))
+            
+            # Redirección segura
+            if next_page and next_page.startswith('/') and not next_page.startswith('//'):
+                return redirect(next_page)
+            else:
+                # Redirección predeterminada
+                return redirect(url_for('main.app_shell'))
             
         else:
             flash('Email o contraseña incorrectos.', 'error')
-            
+    
     return render_template('auth/login.html', form=form, now=datetime.now())
 
 @auth.route('/logout')
@@ -52,7 +69,7 @@ def logout():
     return redirect(url_for('main.index'))
 
 @auth.route('/register', methods=['GET', 'POST'])
-@anonymous_user_required
+@anonymous_required
 def register():
     """Ruta para registro de nuevos usuarios."""
     form = RegistrationForm()
@@ -108,7 +125,7 @@ def confirm_email(token):
         return redirect(url_for('auth.login'))
 
 @auth.route('/reset-password', methods=['GET', 'POST'])
-@anonymous_user_required
+@anonymous_required
 def request_reset_password():
     """Ruta para solicitar restablecimiento de contraseña."""
     form = RequestResetPasswordForm()
@@ -126,7 +143,7 @@ def request_reset_password():
     return render_template('auth/request_reset_password.html', form=form, now=datetime.now())
 
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
-@anonymous_user_required
+@anonymous_required
 def reset_password(token):
     """Ruta para restablecer contraseña."""
     try:
@@ -151,7 +168,7 @@ def reset_password(token):
     return render_template('auth/reset_password.html', form=form, now=datetime.now(), token=token)
 
 @auth.route('/resend-confirmation')
-@anonymous_user_required
+@anonymous_required
 def resend_confirmation():
     """Ruta para reenviar correo de confirmación."""
     email = request.args.get('email')

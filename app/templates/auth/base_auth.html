@@ -3,20 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Eureka - Tu espacio de ideas{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     <meta name="description" content="Eureka - Tu espacio personal para capturar y organizar ideas">
+    <meta name="keywords" content="eureka, notas, organización, ideas, productividad">
+    <meta name="author" content="Eureka">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/EUREKA-ICON-CLR-PNG.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/EUREKA-ICON-CLR-PNG.png') }}">
+    
+    <title>{% block title %}Eureka - Tu espacio de ideas{% endblock %}</title>
+    
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/htmx.css') }}">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.2" defer></script>
+    <script src="{{ url_for('static', filename='js/utilities/htmx-utilities.js') }}" defer></script>
+    
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <div class="auth-container">
-        <!-- Logo/Branding -->
+        <!-- Logo y marca -->
         <div class="auth-logo">
-            <h1>
-                <span class="accent">E</span>ureka
-            </h1>
+            <img src="{{ url_for('static', filename='images/EUREKA-LOGO-BLCK-PNG.png') }}" 
+                 alt="Eureka Logo" 
+                 class="logo-image theme-toggle" 
+                 data-light-src="{{ url_for('static', filename='images/EUREKA-LOGO-BLCK-PNG.png') }}"
+                 data-dark-src="{{ url_for('static', filename='images/EUREKA-ICON-WHT-PNG.png') }}">
             <p>{% block subtitle %}Tu espacio personal de ideas{% endblock %}</p>
         </div>
         
@@ -29,7 +49,7 @@
                                              'alert-danger' if category == 'error' else
                                              'alert-warning' if category == 'warning' else
                                              'alert-info' %}
-                        <div class="alert {{ alert_class }}" role="alert">
+                        <div class="alert {{ alert_class }} fade-me" role="alert">
                             {{ message }}
                         </div>
                     {% endfor %}
@@ -38,39 +58,86 @@
         {% endwith %}
         
         <!-- Contenido principal -->
-        {% block content %}{% endblock %}
+        <main class="auth-content">
+            {% block content %}{% endblock %}
+        </main>
         
         <!-- Footer -->
-        <div class="auth-footer">
-            © Eureka {{ now.year }} · <a href="{{ url_for('main.terms') }}">Términos</a> · <a href="{{ url_for('main.privacy') }}">Privacidad</a>
-        </div>
+        <footer class="auth-footer">
+            <p>&copy; Eureka {{ now.year }} · <a href="{{ url_for('main.terms') }}">Términos</a> · <a href="{{ url_for('main.privacy') }}">Privacidad</a></p>
+        </footer>
     </div>
     
-    {% block scripts %}
+    <!-- Scripts -->
     <script>
-        // Animaciones y transiciones con HTMX
-        document.addEventListener('htmx:configRequest', function(evt) {
-            // Añadir loader si se necesita
-            const submitBtn = evt.detail.elt.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.innerHTML = '<span class="loader"></span> Procesando...';
-                submitBtn.disabled = true;
+        // Función para alternar temas claro/oscuro
+        document.addEventListener('DOMContentLoaded', function() {
+            const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('theme');
+            
+            // Aplicar tema inicial
+            if (savedTheme === 'dark' || (!savedTheme && prefersDarkMode)) {
+                document.body.classList.add('theme-dark');
+                updateThemeImages('dark');
+            } else {
+                document.body.classList.add('theme-light');
+                updateThemeImages('light');
             }
+            
+            // Añadir botón para cambiar tema
+            const themeToggleBtn = document.createElement('button');
+            themeToggleBtn.id = 'theme-toggle';
+            themeToggleBtn.className = 'theme-toggle-btn';
+            themeToggleBtn.setAttribute('aria-label', 'Cambiar tema');
+            themeToggleBtn.innerHTML = document.body.classList.contains('theme-dark') ? 
+                                      '☀️' : '🌙';
+            
+            themeToggleBtn.addEventListener('click', function() {
+                const isDark = document.body.classList.toggle('theme-dark');
+                document.body.classList.toggle('theme-light');
+                
+                // Actualizar iconos
+                this.innerHTML = isDark ? '☀️' : '🌙';
+                updateThemeImages(isDark ? 'dark' : 'light');
+                
+                // Guardar preferencia
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+            
+            // Añadir botón al DOM
+            document.querySelector('.auth-container').appendChild(themeToggleBtn);
         });
         
-        document.addEventListener('htmx:afterSwap', function(evt) {
-            // Animación después de la carga
-            const elements = document.querySelectorAll('.auth-card, .auth-logo');
-            elements.forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(10px)';
-                setTimeout(() => {
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, 50);
+        // Actualizar imágenes según el tema
+        function updateThemeImages(theme) {
+            const themeImages = document.querySelectorAll('.theme-toggle');
+            themeImages.forEach(img => {
+                if (theme === 'dark' && img.dataset.darkSrc) {
+                    img.src = img.dataset.darkSrc;
+                } else if (theme === 'light' && img.dataset.lightSrc) {
+                    img.src = img.dataset.lightSrc;
+                }
             });
+        }
+        
+        // Animaciones para HTMX
+        document.addEventListener('htmx:configRequest', function(evt) {
+            // Animación de botones y formularios durante carga
+            const form = evt.detail.elt.closest('form');
+            if (form) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const loader = document.createElement('span');
+                    loader.className = 'spinner';
+                    loader.style.marginRight = '0.5rem';
+                    
+                    submitBtn.prepend(loader);
+                    submitBtn.disabled = true;
+                }
+            }
         });
     </script>
-    {% endblock %}
+    
+    {% block scripts %}{% endblock %}
 </body>
 </html> 
