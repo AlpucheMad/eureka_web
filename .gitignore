@@ -176,6 +176,8 @@ eureka-env/
 .env.development
 .env.production
 .env
+.sql
+*.sql
 
 # IDE specific
 .vscode/

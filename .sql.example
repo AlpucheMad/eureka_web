@@ -1,5 +1,8 @@
+-- Archivo de ejemplo para configurar la base de datos
+-- Reemplaza 'tu_contraseña_segura' con una contraseña real
+
 -- Create dedicated user for the application
-CREATE USER eureka_user WITH PASSWORD 'Eur3ka_S3cure_P@ss';
+CREATE USER eureka_user WITH PASSWORD 'tu_contraseña_segura';
 
 -- Create databases
 CREATE DATABASE eureka_dev;
@@ -35,4 +38,4 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO eureka_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO eureka_user;
 
 -- Establecer el propietario del esquema public
-ALTER SCHEMA public OWNER TO eureka_user;
+ALTER SCHEMA public OWNER TO eureka_user; 
