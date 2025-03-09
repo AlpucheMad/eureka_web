@@ -3,13 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eureka - Your idea space</title>
+    <title>Eureka - Tu espacio de ideas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <style>
+        :root {
+            --color-accent: #F9B234;
+            --color-text-light: #333333;
+            --color-text-dark: #E0E0E0;
+            --color-bg-light: #FFFFFF;
+            --color-bg-dark: #121212;
+            --color-sec-light-1: #F5F5F5;
+            --color-sec-light-2: #E0E0E0;
+            --color-sec-dark-1: #2D2D2D;
+            --color-sec-dark-2: #3D3D3D;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .theme-light {
+            background-color: var(--color-bg-light);
+            color: var(--color-text-light);
+        }
+        .theme-dark {
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-dark);
+        }
+        .accent {
+            color: var(--color-accent);
+        }
+        .btn-minimal {
+            border: 1px solid var(--color-sec-light-2);
+            border-radius: 4px;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+        .btn-minimal:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+        .btn-accent {
+            background-color: var(--color-accent);
+            color: white;
+            border-radius: 4px;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+        .btn-accent:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .sidebar {
+            border-right: 1px solid var(--color-sec-light-2);
+            transition: transform 0.3s ease;
+        }
+        .entry-card {
+            border-radius: 6px;
+            border: 1px solid var(--color-sec-light-2);
+            transition: all 0.2s ease;
+        }
+        .entry-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-2px);
+        }
+        .textarea-minimal {
+            resize: none;
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            background-color: transparent;
+        }
+        .textarea-minimal:focus {
+            outline: none;
+        }
+    </style>
 </head>
-<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center mb-8">Welcome to Eureka</h1>
-        <p class="text-center mb-4">Your personal space to capture and organize ideas.</p>
+<body class="theme-light min-h-screen">
+    <!-- Barra superior -->
+    <header class="border-b border-gray-200 py-4">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold">
+                    <span class="accent">E</span>ureka
+                </h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="btn-minimal flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+                    </svg>
+                    Ajustes
+                </button>
+                <a href="{{ url_for('auth.logout') }}" class="btn-minimal flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-5-5H3zM2 4a2 2 0 012-2h9.586a2 2 0 011.414.586l5 5A2 2 0 0120 9.414V16a2 2 0 01-2 2H4a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                    </svg>
+                    Cerrar sesión
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <div class="container mx-auto px-6 py-8">
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for category, message in messages %}
+                        {% set alert_color = 'bg-green-50 border-green-400 text-green-700' if category == 'success' else
+                                  'bg-red-50 border-red-400 text-red-700' if category == 'error' else
+                                  'bg-yellow-50 border-yellow-400 text-yellow-700' if category == 'warning' else
+                                  'bg-blue-50 border-blue-400 text-blue-700' %}
+                        <div class="{{ alert_color }} px-4 py-3 rounded-md border relative" role="alert">
+                            <span class="block sm:inline">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <div class="sidebar w-64 pr-6">
+                <div class="mb-8">
+                    <h2 class="text-lg font-medium mb-4">Colecciones</h2>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="block py-2 px-3 rounded hover:bg-gray-100">Ideas</a></li>
+                        <li><a href="#" class="block py-2 px-3 rounded hover:bg-gray-100">Proyectos</a></li>
+                        <li><a href="#" class="block py-2 px-3 rounded hover:bg-gray-100">Aprendizaje</a></li>
+                    </ul>
+                    <button class="mt-3 text-sm text-accent flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                        </svg>
+                        Nueva colección
+                    </button>
+                </div>
+                
+                <div>
+                    <h2 class="text-lg font-medium mb-4">Etiquetas</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">ideas</span>
+                        <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">trabajo</span>
+                        <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">personal</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Área principal de contenido -->
+            <div class="flex-1">
+                <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                    <input type="text" placeholder="Título de tu idea..." class="w-full text-xl font-medium mb-4 p-2 border-b border-gray-200 focus:outline-none focus:border-accent" />
+                    <textarea class="textarea-minimal" rows="8" placeholder="Escribe tu idea aquí..."></textarea>
+                    <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
+                        <div class="flex items-center space-x-4">
+                            <select class="border border-gray-200 rounded px-2 py-1 text-sm">
+                                <option>Sin colección</option>
+                                <option>Ideas</option>
+                                <option>Proyectos</option>
+                            </select>
+                            <button class="text-sm text-gray-500 hover:text-accent">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="btn-minimal">Guardar borrador</button>
+                            <button class="btn-accent">Publicar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-medium mb-4">Tus ideas recientes</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="entry-card p-4">
+                        <h3 class="font-medium mb-1">Idea para un nuevo proyecto</h3>
+                        <p class="text-gray-600 text-sm mb-2">Actualizado hace 2 días</p>
+                        <p class="text-sm">Desarrollar una aplicación móvil para organizar recetas y lista de compras...</p>
+                    </div>
+                    <div class="entry-card p-4">
+                        <h3 class="font-medium mb-1">Notas de la reunión</h3>
+                        <p class="text-gray-600 text-sm mb-2">Actualizado ayer</p>
+                        <p class="text-sm">Puntos clave discutidos durante la reunión de equipo del lunes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

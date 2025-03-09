@@ -1,0 +1,63 @@
+{% extends "auth/base_auth.html" %}
+
+{% block title %}Registro | Eureka{% endblock %}
+
+{% block subtitle %}Crea tu cuenta en Eureka{% endblock %}
+
+{% block content %}
+    <h2 class="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200">Crear cuenta</h2>
+    
+    <form method="POST" action="{{ url_for('auth.register') }}" hx-post="{{ url_for('auth.register') }}" hx-swap="outerHTML">
+        {{ form.csrf_token }}
+        
+        <div class="mb-4">
+            {{ form.username.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
+            {{ form.username(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            {{ form.email.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
+            {{ form.email(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            {{ form.password.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
+            {{ form.password(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">La contraseña debe tener al menos 8 caracteres, una letra minúscula, una mayúscula, un número y un carácter especial.</p>
+        </div>
+        
+        <div class="mb-6">
+            {{ form.password_confirm.label(class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300") }}
+            {{ form.password_confirm(class="w-full py-3 px-4 rounded-md border border-gray-200 focus:ring-2 focus:ring-orange-200 focus:border-orange-300 focus:outline-none transition duration-200 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-orange-900 dark:focus:border-orange-700") }}
+            {% if form.password_confirm.errors %}
+                {% for error in form.password_confirm.errors %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            {{ form.submit(class="w-full py-3 px-4 bg-orange-400 hover:bg-orange-500 text-white font-medium rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 dark:bg-orange-600 dark:hover:bg-orange-700") }}
+        </div>
+    </form>
+    
+    <div class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+        ¿Ya tienes una cuenta? 
+        <a href="{{ url_for('auth.login') }}" class="text-orange-500 hover:text-orange-600 font-medium dark:text-orange-400 dark:hover:text-orange-300">Inicia sesión aquí</a>
+    </div>
+{% endblock %} 
